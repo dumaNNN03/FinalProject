@@ -11,6 +11,17 @@ namespace ConsoleUI
     {
         static void Main(string[] args)
         {
+            //Product();
+            CategoryManager categoryManager = new CategoryManager(new EfCategoryDal());
+            foreach (var item in categoryManager.GetAll())
+            {
+                Console.WriteLine(item.CategoryName);
+            }
+
+        }
+
+        private static void Product()
+        {
             ProductManager productManager = new ProductManager(new EfProductDal());
             foreach (var product in productManager.GetAll())
             {
@@ -22,11 +33,10 @@ namespace ConsoleUI
                 Console.WriteLine(product.CategoryID + " " + product.ProductName);
             }
 
-            foreach (var product in productManager.GetByUnitPrice(10,20))
+            foreach (var product in productManager.GetByUnitPrice(10, 20))
             {
                 Console.WriteLine(product.ProductName + " " + product.UnitPrice);
             }
-           
         }
     }
 }
