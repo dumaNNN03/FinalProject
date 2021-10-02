@@ -1,4 +1,5 @@
 ﻿using DataAccess.Abstract;
+using Entities.DTOs;
 using Entitiy.Concrete;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,11 @@ namespace DataAccess.Concrete
         }
 
         public Product Get(Expression<Func<Product, bool>> filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<ProductDetailDto> GetProductDetail()
         {
             throw new NotImplementedException();
         }
