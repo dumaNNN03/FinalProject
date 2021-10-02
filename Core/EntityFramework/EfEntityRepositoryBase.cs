@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entitiy.Abstract
+namespace Core.EntityFramework
 {
-    public interface IEntitiy
+    public class EfEntityRepositoryBase<TEntity,TContext>
     {
-       
     }
 }

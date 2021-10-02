@@ -1,4 +1,4 @@
-﻿using Entitiy.Abstract;
+﻿using Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Entitiy.Concrete
 {
-    public class Customer : IEntitiy
+    public class Customer : IEntity
     {
         public string CustomerId { get; set; }
         public string ContactName { get; set; }
