@@ -11,7 +11,7 @@ namespace ConsoleUI
     {
         static void Main(string[] args)
         {
-            //Product();
+            Product();
             //Category();
 
         }
@@ -42,10 +42,21 @@ namespace ConsoleUI
             //{
             //    Console.WriteLine(product.ProductName + " " + product.UnitPrice);
             //}
-            foreach (var item in productManager.GetProductDetail())
+            var result = productManager.GetProductDetail();
+            if(result.Success==true)
             {
-                Console.WriteLine(item.CategoryName+" "+item.ProductName);
+                foreach (var product in result.Data)
+                {
+                    Console.WriteLine(product.CategoryName + " " + product.ProductName);
+                }
             }
+            else
+            {
+                Console.WriteLine(result.Message);
+
+            }
+            
+            
         }
     }
 }
