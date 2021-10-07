@@ -19,7 +19,7 @@ namespace ConsoleUI
         private static void Category()
         {
             CategoryManager categoryManager = new CategoryManager(new EfCategoryDal());
-            foreach (var item in categoryManager.GetAll())
+            foreach (var item in categoryManager.GetAll().Data)
             {
                 Console.WriteLine(item.CategoryName);
             }
@@ -27,7 +27,7 @@ namespace ConsoleUI
 
         private static void Product()
         {
-            ProductManager productManager = new ProductManager(new EfProductDal());
+            ProductManager productManager = new ProductManager(new EfProductDal(),new CategoryManager(new EfCategoryDal()));
             //foreach (var product in productManager.GetAll())
             //{
             //    Console.WriteLine(product.ProductName);
