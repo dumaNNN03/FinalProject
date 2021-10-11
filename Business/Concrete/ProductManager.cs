@@ -3,6 +3,10 @@ using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
+using Core.Aspects.Caching;
+using Core.Aspects.Performance;
+using Core.Aspects.Transaction;
+using Core.CrossCuttingConcerns.Caching;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
@@ -22,55 +26,61 @@ namespace Business.Concrete
     {
         IProductDal _productDal;
         ICategoryService _categoryService;
-        public ProductManager(IProductDal productDal,ICategoryService categoryService)
+
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
             _categoryService = categoryService;
+
         }
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
-            IResult result = BusinessRules.Run(CheckIfCategoryLimitExceded(),CheckIfProductCountOfCategoryCorrect(product.CategoryID), 
+            IResult result = BusinessRules.Run(CheckIfCategoryLimitExceded(), CheckIfProductCountOfCategoryCorrect(product.CategoryID),
                 CheckIfProductNameExists(product.ProductName));
             if (result != null)
             {
                 return result;
             }
-           
-                _productDal.Add(product);
-                return new SuccessResult(Messages.ProductAdded);
-        }
 
+            _productDal.Add(product);
+            return new SuccessResult(Messages.ProductAdded);
+        }
+        [CacheAspect]
         public IDataResult<Product> Get(int Id)
         {
-            return new SuccessDataResult<Product>(_productDal.Get(p=>p.ProductId == Id));
+            return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == Id));
         }
 
+        [CacheAspect]
         public IDataResult<List<Product>> GetAll()
         {
-            if(DateTime.Now.Hour == 11)
+            if (DateTime.Now.Hour == 11)
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
             }
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(),Messages.ProductsListed);
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
         }
-
+        [CacheAspect]
         public IDataResult<List<Product>> GetAllByCategoryId(int id)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.CategoryID == id));
         }
 
+        [CacheAspect]
+        //[PerformanceAspect(5)]
         public IDataResult<Product> GetById(int ID)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == ID));
         }
-
+        [CacheAspect]
         public IDataResult<List<Product>> GetByUnitPrice(decimal min, decimal max)
         {
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.UnitPrice >= min && p.UnitPrice <=max));
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.UnitPrice >= min && p.UnitPrice <= max));
         }
-
+        [CacheAspect]
         public IDataResult<List<ProductDetailDto>> GetProductDetail()
         {
             if (DateTime.Now.Hour == 05)
@@ -82,6 +92,7 @@ namespace Business.Concrete
         }
 
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryID),
@@ -114,7 +125,7 @@ namespace Business.Concrete
                 return new ErrorResult(Messages.ProductNameAlreadyExists);
             }
             return new SuccessResult();
-            
+
         }
 
         private IResult CheckIfCategoryLimitExceded()
@@ -128,7 +139,16 @@ namespace Business.Concrete
             return new SuccessResult();
 
         }
-
-
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            Add(product);
+            if (product.UnitPrice < 10)
+            {
+                throw new Exception("");
+            }
+            Add(product);
+            return new SuccessResult();
+        }
     }
 }
